@@ -1,4 +1,4 @@
-// src/api/axios.ts
+// src/lib/axios.ts
 import axios from 'axios';
 
 const instance = axios.create({
@@ -8,5 +8,31 @@ const instance = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Add request interceptor to include auth token if available
+instance.interceptors.request.use(
+  (config) => {
+    // For now, we'll rely on cookies for authentication
+    // The backend will handle both cookie and Bearer token auth
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle auth errors
+instance.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      // Redirect to login if unauthorized
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default instance;

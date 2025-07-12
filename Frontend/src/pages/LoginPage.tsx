@@ -29,19 +29,41 @@ const LoginPage = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation
+    if (!formData.email.trim()) {
+      toast({
+        title: "Error",
+        description: "Email is required.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!formData.password.trim()) {
+      toast({
+        title: "Error",
+        description: "Password is required.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const result = await apiLogin({ email: formData.email, password: formData.password });
-      if (result.success) {
+      if (result.success && result.user) {
         login({
+          _id: result.user._id,
           name: result.user.fullName,
           email: result.user.email,
+          profilePic: result.user.profilePic,
+          role: result.user.role
         });
         toast({
           title: "Welcome back!",
           description: "You've successfully logged in to StackIt.",
         });
-        setIsLoading(false);
         navigate('/');
       } else {
         toast({
@@ -49,14 +71,15 @@ const LoginPage = () => {
           description: result.message || 'Login failed',
           variant: "destructive"
         });
-        setIsLoading(false);
       }
     } catch (err: any) {
+      console.error('Login error:', err);
       toast({
         title: "Error",
-        description: err.response?.data?.message || 'Login failed',
+        description: err.response?.data?.message || 'Login failed. Please check your credentials.',
         variant: "destructive"
       });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -152,6 +175,18 @@ const LoginPage = () => {
               </Button>
             </form>
             
+            <div className="mt-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{' '}
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-sm text-primary hover:text-primary/80"
+                  onClick={() => navigate('/signup')}
+                >
+                  Sign up
+                </Button>
+              </p>
+            </div>
           </CardContent>
         </Card>
         {/* Footer */}

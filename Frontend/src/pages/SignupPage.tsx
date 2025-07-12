@@ -31,6 +31,37 @@ const SignupPage = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation
+    if (!formData.fullName.trim()) {
+      toast({
+        title: "Error",
+        description: "Full name is required.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!formData.email.trim()) {
+      toast({
+        title: "Error",
+        description: "Email is required.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Error",
@@ -39,6 +70,16 @@ const SignupPage = () => {
       });
       return;
     }
+    
+    if (formData.password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const result = await apiSignup({
@@ -46,16 +87,19 @@ const SignupPage = () => {
         password: formData.password,
         fullName: formData.fullName
       });
-      if (result.success) {
+      
+      if (result.success && result.user) {
         login({
+          _id: result.user._id,
           name: result.user.fullName,
           email: result.user.email,
+          profilePic: result.user.profilePic,
+          role: result.user.role
         });
         toast({
           title: "Welcome to StackIt!",
           description: "Your account has been created successfully.",
         });
-        setIsLoading(false);
         navigate('/');
       } else {
         toast({
@@ -63,14 +107,15 @@ const SignupPage = () => {
           description: result.message || 'Signup failed',
           variant: "destructive"
         });
-        setIsLoading(false);
       }
     } catch (err: any) {
+      console.error('Signup error:', err);
       toast({
         title: "Error",
-        description: err.response?.data?.message || 'Signup failed',
+        description: err.response?.data?.message || 'Signup failed. Please try again.',
         variant: "destructive"
       });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -197,6 +242,18 @@ const SignupPage = () => {
               </Button>
             </form>
             
+            <div className="mt-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                Already have an account?{' '}
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-sm text-primary hover:text-primary/80"
+                  onClick={() => navigate('/login')}
+                >
+                  Log in
+                </Button>
+              </p>
+            </div>
           </CardContent>
         </Card>
         {/* Footer */}

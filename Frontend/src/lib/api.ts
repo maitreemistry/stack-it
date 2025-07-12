@@ -33,3 +33,8 @@ export const getCurrentUser = async () => {
   const res = await axios.get<AuthResponse>('/auth/me');
   return res.data;
 };
+
+export const createQuestion = async (questionData: { title: string; body: string; tags: string[] }) => {
+  const res = await axios.post<{ success: boolean; question?: any; message?: string }>('/questions', questionData);
+  return res.data;
+};

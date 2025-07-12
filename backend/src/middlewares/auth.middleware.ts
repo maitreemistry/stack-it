@@ -16,15 +16,21 @@ export const authenticateUser = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        // Get token from header
-        const authHeader = req.headers.authorization;
-        
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        let token: string | undefined;
+
+        // First try to get token from cookies (for login/signup flow)
+        if (req.cookies && req.cookies.jwt) {
+            token = req.cookies.jwt;
+        }
+        // Then try to get token from Authorization header (for API calls)
+        else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+            token = req.headers.authorization.substring(7); // Remove 'Bearer ' prefix
+        }
+
+        if (!token) {
             res.status(401).json({ error: 'Access token required' });
             return;
         }
-
-        const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
         // Verify JWT token
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY || 'fallback-secret') as { userId: string };

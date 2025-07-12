@@ -9,9 +9,10 @@ interface AskQuestionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (question: any) => void;
+  isSubmitting?: boolean;
 }
 
-export default function AskQuestionModal({ isOpen, onClose, onSubmit }: AskQuestionModalProps) {
+export default function AskQuestionModal({ isOpen, onClose, onSubmit, isSubmitting = false }: AskQuestionModalProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -189,10 +190,10 @@ export default function AskQuestionModal({ isOpen, onClose, onSubmit }: AskQuest
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={!title.trim() || !content.trim() || tags.length === 0}
+              disabled={!title.trim() || !content.trim() || tags.length === 0 || isSubmitting}
               className="stackit-button-primary"
             >
-              Post Question
+              {isSubmitting ? "Posting..." : "Post Question"}
             </Button>
           </div>
         </div>

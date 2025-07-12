@@ -3,12 +3,26 @@ import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
 import QuestionList from '@/components/QuestionList';
 import AskQuestionModal from '@/components/AskQuestionModal';
+import { createQuestion } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
+import { useUser } from '@/lib/UserContext';
 
 const Index = () => {
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
   const [heroSearchQuery, setHeroSearchQuery] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  const { user } = useUser();
 
   const handleAskQuestion = () => {
+    if (!user) {
+      toast({
+        title: "Please log in",
+        description: "You need to be logged in to ask a question.",
+        variant: "destructive"
+      });
+      return;
+    }
     setIsAskModalOpen(true);
   };
 
@@ -16,9 +30,49 @@ const Index = () => {
     setIsAskModalOpen(false);
   };
 
-  const handleSubmitQuestion = (questionData: any) => {
-    console.log('New question submitted:', questionData);
-    // Here you would typically send the data to your backend
+  const handleSubmitQuestion = async (questionData: any) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to ask a question.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const result = await createQuestion({
+        title: questionData.title,
+        body: questionData.content,
+        tags: questionData.tags
+      });
+
+      if (result.success) {
+        toast({
+          title: "Question posted!",
+          description: "Your question has been successfully posted.",
+        });
+        handleCloseModal();
+        // Refresh the page to show the new question
+        window.location.reload();
+      } else {
+        toast({
+          title: "Error",
+          description: result.message || "Failed to post question",
+          variant: "destructive"
+        });
+      }
+    } catch (error: any) {
+      console.error('Error creating question:', error);
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || "Failed to post question. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleHeroSearch = (query: string) => {
@@ -42,6 +96,7 @@ const Index = () => {
         isOpen={isAskModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleSubmitQuestion}
+        isSubmitting={isSubmitting}
       />
     </div>
   );

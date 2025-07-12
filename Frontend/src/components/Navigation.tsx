@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/lib/UserContext';
+import { logout as apiLogout } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 interface NavigationProps {
   onAskQuestion: () => void;
@@ -14,6 +16,24 @@ export default function Navigation({ onAskQuestion }: NavigationProps) {
   const [profileDropdown, setProfileDropdown] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useUser();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await apiLogout();
+      logout();
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still logout locally even if API call fails
+      logout();
+      navigate('/');
+    }
+  };
 
   // Helper for avatar initial
   const getInitial = (name: string) => name?.charAt(0).toUpperCase() || '?';
@@ -89,7 +109,7 @@ export default function Navigation({ onAskQuestion }: NavigationProps) {
                       </button>
                       <button
                         className="w-full text-left px-4 py-2 hover:bg-secondary/10 transition-colors flex items-center"
-                        onClick={() => { setProfileDropdown(false); logout(); }}
+                        onClick={() => { setProfileDropdown(false); handleLogout(); }}
                       >
                         <LogOut className="h-4 w-4 mr-2" />Logout
                       </button>
@@ -157,7 +177,7 @@ export default function Navigation({ onAskQuestion }: NavigationProps) {
                   </button>
                   <button
                     className="w-full flex items-center px-4 py-2 rounded-lg hover:bg-secondary/10 transition-colors justify-center"
-                    onClick={() => { setIsMenuOpen(false); logout(); }}
+                    onClick={() => { setIsMenuOpen(false); handleLogout(); }}
                   >
                     <LogOut className="h-4 w-4 mr-2" />Logout
                   </button>

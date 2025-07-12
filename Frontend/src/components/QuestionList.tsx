@@ -27,13 +27,48 @@ export default function QuestionList({ onAskQuestion, initialSearchQuery = '' }:
     async function fetchData() {
       setLoading(true);
       try {
+        console.log('Fetching questions...');
         const questionsRes = await axios.get('/questions');
-        setQuestions(questionsRes.data.questions || []);
-        // Use admin route for users
-        const usersRes = await axios.get('/auth/admin/users');
-        setUsers(usersRes.data.users || []);
+        console.log('Questions response:', questionsRes.data);
+        
+        // Transform backend data to match frontend expectations
+        const transformedQuestions = (questionsRes.data.questions || []).map((q: any) => ({
+          id: q._id,
+          title: q.title,
+          excerpt: q.body ? (q.body.substring(0, 150) + (q.body.length > 150 ? '...' : '')) : '',
+          body: q.body,
+          tags: q.tags || [],
+          author: {
+            id: q.author?._id || 'unknown',
+            name: q.author?.fullName || 'Unknown User',
+            username: q.author?.email?.split('@')[0] || 'unknown',
+            avatar: q.author?.profilePic || 'https://api.dicebear.com/7.x/avataaars/svg?seed=unknown'
+          },
+          likes: q.votes > 0 ? q.votes : 0,
+          dislikes: q.votes < 0 ? Math.abs(q.votes) : 0,
+          answers: 0, // TODO: Add answer count
+          views: 0, // TODO: Add view count
+          isAnswered: false, // TODO: Add answer check
+          hasAcceptedAnswer: false, // TODO: Add accepted answer check
+          timeAgo: q.createdAt,
+          createdAt: q.createdAt,
+          updatedAt: q.updatedAt
+        }));
+        
+        setQuestions(transformedQuestions);
+        
+        // Try to fetch users, but don't fail if it doesn't work
+        try {
+          const usersRes = await axios.get('/auth/admin/users');
+          setUsers(usersRes.data.users || []);
+        } catch (userErr) {
+          console.log('Could not fetch users (admin route may not be accessible):', userErr);
+          setUsers([]);
+        }
       } catch (err) {
-        // handle error
+        console.error('Error fetching questions:', err);
+        setQuestions([]);
+        setUsers([]);
       }
       setLoading(false);
     }
