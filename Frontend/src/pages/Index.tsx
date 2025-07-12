@@ -6,6 +6,7 @@ import AskQuestionModal from '@/components/AskQuestionModal';
 
 const Index = () => {
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
+  const [heroSearchQuery, setHeroSearchQuery] = useState('');
 
   const handleAskQuestion = () => {
     setIsAskModalOpen(true);
@@ -20,11 +21,22 @@ const Index = () => {
     // Here you would typically send the data to your backend
   };
 
+  const handleHeroSearch = (query: string) => {
+    setHeroSearchQuery(query);
+    // Scroll to questions section when searching
+    if (query.trim()) {
+      const questionsSection = document.querySelector('section');
+      if (questionsSection) {
+        questionsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation onAskQuestion={handleAskQuestion} />
-      <HeroSection onAskQuestion={handleAskQuestion} />
-      <QuestionList onAskQuestion={handleAskQuestion} />
+      <HeroSection onAskQuestion={handleAskQuestion} onSearch={handleHeroSearch} />
+      <QuestionList onAskQuestion={handleAskQuestion} initialSearchQuery={heroSearchQuery} />
       
       <AskQuestionModal
         isOpen={isAskModalOpen}

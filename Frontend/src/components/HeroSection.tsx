@@ -1,12 +1,35 @@
-import { Search, TrendingUp, Users, MessageSquare } from 'lucide-react';
+import { useState } from 'react';
+import { Search, TrendingUp, Users, MessageSquare, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 interface HeroSectionProps {
   onAskQuestion: () => void;
+  onSearch?: (query: string) => void;
 }
 
-export default function HeroSection({ onAskQuestion }: HeroSectionProps) {
+export default function HeroSection({ onAskQuestion, onSearch }: HeroSectionProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = () => {
+    if (searchQuery.trim() && onSearch) {
+      onSearch(searchQuery.trim());
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    if (onSearch) {
+      onSearch('');
+    }
+  };
+
   return (
     <section className="relative py-20 lg:py-32 overflow-hidden">
       {/* Background Gradient */}
@@ -31,16 +54,29 @@ export default function HeroSection({ onAskQuestion }: HeroSectionProps) {
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto mb-8">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5 pointer-events-none" />
               <Input
                 placeholder="Search thousands of questions or ask your own..."
-                className="pl-12 pr-4 py-4 text-lg stackit-input h-14 rounded-xl"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="pl-12 pr-24 py-4 text-lg stackit-input h-14 rounded-xl border-2 focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground hover:border-border focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearSearch}
+                  className="absolute right-20 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted/50 transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
               <Button 
-                onClick={onAskQuestion}
+                onClick={handleSearch}
                 className="absolute right-2 top-2 stackit-button-secondary h-10"
               >
-                Ask Now
+                Search
               </Button>
             </div>
           </div>
