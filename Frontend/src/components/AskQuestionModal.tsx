@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { X, Plus, Bold, Italic, List, Code, Image, Eye } from 'lucide-react';
+import { X, Plus, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import RichTextEditor from './RichTextEditor';
 
 interface AskQuestionModalProps {
   isOpen: boolean;
@@ -104,47 +104,25 @@ export default function AskQuestionModal({ isOpen, onClose, onSubmit }: AskQuest
                 </div>
               </div>
 
-              {/* Editor Toolbar */}
-              {!isPreview && (
-                <div className="flex items-center space-x-1 p-2 border border-border rounded-t-lg bg-muted/20">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <Bold className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <Italic className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <List className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <Code className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <Image className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-
               {/* Content Area */}
               {isPreview ? (
                 <div className="border border-border rounded-lg p-4 min-h-[200px] bg-muted/10">
-                  <div className="prose max-w-none">
+                  <div className="prose prose-sm max-w-none [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-1 [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_a]:text-blue-600 [&_a]:underline [&_a]:hover:text-blue-800 [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-sm [&_pre]:bg-gray-900 [&_pre]:border [&_pre]:border-gray-700 [&_pre]:rounded-lg [&_pre]:p-4 [&_pre]:my-4 [&_pre]:overflow-x-auto [&_pre]:shadow-lg [&_pre_code]:bg-transparent [&_pre_code]:text-gray-100 [&_pre_code]:p-0 [&_pre_code]:font-mono [&_pre_code]:text-sm [&_pre_code]:leading-relaxed">
                     {content ? (
-                      <div className="whitespace-pre-wrap">{content}</div>
+                      <div dangerouslySetInnerHTML={{ __html: content }} />
                     ) : (
                       <p className="text-muted-foreground italic">Nothing to preview yet...</p>
                     )}
                   </div>
                 </div>
               ) : (
-                <Textarea
+                <RichTextEditor
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  onChange={setContent}
                   placeholder="Provide more details about your question. Include what you've tried, what you expected to happen, and what actually happened."
-                  className="stackit-input min-h-[200px] resize-y rounded-t-none"
+                  minHeight="200px"
                 />
               )}
-              
               <p className="text-xs text-muted-foreground mt-1">
                 Include code examples, error messages, and what you've already tried.
               </p>
@@ -155,7 +133,6 @@ export default function AskQuestionModal({ isOpen, onClose, onSubmit }: AskQuest
               <label className="block text-sm font-medium text-foreground mb-2">
                 Tags* (at least 1, max 5)
               </label>
-              
               {/* Tag Input */}
               <div className="flex gap-2 mb-3">
                 <Input
@@ -178,7 +155,6 @@ export default function AskQuestionModal({ isOpen, onClose, onSubmit }: AskQuest
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-
               {/* Selected Tags */}
               {tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-2">
@@ -195,7 +171,6 @@ export default function AskQuestionModal({ isOpen, onClose, onSubmit }: AskQuest
                   ))}
                 </div>
               )}
-
               <p className="text-xs text-muted-foreground">
                 Tags help categorize your question and make it easier for others to find.
               </p>

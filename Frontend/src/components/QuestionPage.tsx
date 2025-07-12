@@ -630,7 +630,7 @@ CMD ["npm", "start"]</code></pre>
             </div>
 
             <div 
-              className="prose prose-gray max-w-none mb-6 prose-headings:font-heading prose-code:bg-muted prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-muted prose-pre:p-4"
+              className="prose prose-gray max-w-none mb-6 prose-headings:font-heading prose-a:text-blue-600 prose-a:underline prose-a:hover:text-blue-800 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-sm prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-700 prose-pre:rounded-lg prose-pre:p-4 prose-pre:my-4 prose-pre:overflow-x-auto prose-pre:shadow-lg prose-pre_code:bg-transparent prose-pre_code:text-gray-100 prose-pre_code:p-0 prose-pre_code:font-mono prose-pre_code:text-sm prose-pre_code:leading-relaxed"
               dangerouslySetInnerHTML={{ __html: question.description }}
             />
 
@@ -757,7 +757,7 @@ CMD ["npm", "start"]</code></pre>
                   )}
 
                   <div 
-                    className="prose prose-gray max-w-none mb-6 prose-headings:font-heading prose-code:bg-muted prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-muted prose-pre:p-4"
+                    className="prose prose-gray max-w-none mb-6 prose-headings:font-heading prose-a:text-blue-600 prose-a:underline prose-a:hover:text-blue-800 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-sm prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-700 prose-pre:rounded-lg prose-pre:p-4 prose-pre:my-4 prose-pre:overflow-x-auto prose-pre:shadow-lg prose-pre_code:bg-transparent prose-pre_code:text-gray-100 prose-pre_code:p-0 prose-pre_code:font-mono prose-code:text-sm prose-pre_code:leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: answer.text }}
                   />
 
