@@ -1,12 +1,35 @@
-import { Search, TrendingUp, Users, MessageSquare } from 'lucide-react';
+import { useState } from 'react';
+import { Search, TrendingUp, Users, MessageSquare, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 interface HeroSectionProps {
   onAskQuestion: () => void;
+  onSearch?: (query: string) => void;
 }
 
-export default function HeroSection({ onAskQuestion }: HeroSectionProps) {
+export default function HeroSection({ onAskQuestion, onSearch }: HeroSectionProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = () => {
+    if (searchQuery.trim() && onSearch) {
+      onSearch(searchQuery.trim());
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    if (onSearch) {
+      onSearch('');
+    }
+  };
+
   return (
     <section className="relative py-20 lg:py-32 overflow-hidden">
       {/* Background Gradient */}
@@ -30,17 +53,32 @@ export default function HeroSection({ onAskQuestion }: HeroSectionProps) {
 
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto mb-8">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+            <div className="relative group">
+              <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 text-muted-foreground h-6 w-6 pointer-events-none transition-colors group-focus-within:text-primary" />
               <Input
                 placeholder="Search thousands of questions or ask your own..."
-                className="pl-12 pr-4 py-4 text-lg stackit-input h-14 rounded-xl"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="pl-14 pr-40 py-5 text-xl font-medium h-16 rounded-2xl border border-border bg-white/90 shadow-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder:text-muted-foreground hover:border-primary outline-none"
               />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={clearSearch}
+                  className="absolute right-32 top-1/2 transform -translate-y-1/2 h-10 w-10 p-0 rounded-full bg-muted/60 hover:bg-muted/80 text-muted-foreground hover:text-foreground shadow transition-all z-10"
+                  tabIndex={-1}
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              )}
               <Button 
-                onClick={onAskQuestion}
-                className="absolute right-2 top-2 stackit-button-secondary h-10"
+                onClick={handleSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-12 px-8 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold shadow-md hover:from-primary/90 hover:to-secondary/90 focus:ring-2 focus:ring-primary/30 transition-all z-20"
+                style={{ letterSpacing: '0.03em' }}
               >
-                Ask Now
+                Search
               </Button>
             </div>
           </div>
