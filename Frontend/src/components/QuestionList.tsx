@@ -16,7 +16,8 @@ const mockQuestions = [
       reputation: 2456
     },
     tags: ['react', 'jwt', 'authentication', 'javascript'],
-    votes: 23,
+    likes: 23,
+    dislikes: 2,
     answers: 4,
     views: 156,
     timeAgo: '2 hours ago',
@@ -33,7 +34,8 @@ const mockQuestions = [
       reputation: 1823
     },
     tags: ['python', 'javascript', 'backend', 'nodejs', 'django'],
-    votes: 18,
+    likes: 18,
+    dislikes: 3,
     answers: 7,
     views: 234,
     timeAgo: '4 hours ago',
@@ -50,7 +52,8 @@ const mockQuestions = [
       reputation: 3201
     },
     tags: ['css', 'grid', 'flexbox', 'layout', 'frontend'],
-    votes: 31,
+    likes: 31,
+    dislikes: 1,
     answers: 9,
     views: 342,
     timeAgo: '6 hours ago',
@@ -67,7 +70,8 @@ const mockQuestions = [
       reputation: 1567
     },
     tags: ['docker', 'production', 'memory', 'debugging', 'deployment'],
-    votes: 12,
+    likes: 12,
+    dislikes: 4,
     answers: 2,
     views: 89,
     timeAgo: '1 day ago',
@@ -84,7 +88,8 @@ const mockQuestions = [
       reputation: 2890
     },
     tags: ['api', 'rate-limiting', 'redis', 'performance', 'backend'],
-    votes: 27,
+    likes: 27,
+    dislikes: 2,
     answers: 5,
     views: 178,
     timeAgo: '1 day ago',
@@ -102,11 +107,21 @@ export default function QuestionList({ onAskQuestion }: QuestionListProps) {
   const [sortBy, setSortBy] = useState('newest');
   const [filterBy, setFilterBy] = useState('all');
 
-  const handleVote = (questionId: string, direction: 'up' | 'down') => {
+  const handleLike = (questionId: string) => {
     setQuestions(prev => 
       prev.map(q => 
         q.id === questionId 
-          ? { ...q, votes: q.votes + (direction === 'up' ? 1 : -1) }
+          ? { ...q, likes: q.likes + 1 }
+          : q
+      )
+    );
+  };
+
+  const handleDislike = (questionId: string) => {
+    setQuestions(prev => 
+      prev.map(q => 
+        q.id === questionId 
+          ? { ...q, dislikes: q.dislikes + 1 }
           : q
       )
     );
@@ -121,7 +136,7 @@ export default function QuestionList({ onAskQuestion }: QuestionListProps) {
       case 'newest':
         return new Date(b.timeAgo).getTime() - new Date(a.timeAgo).getTime();
       case 'votes':
-        return b.votes - a.votes;
+        return b.likes - a.likes;
       case 'answers':
         return b.answers - a.answers;
       case 'views':
@@ -229,7 +244,8 @@ export default function QuestionList({ onAskQuestion }: QuestionListProps) {
             >
               <QuestionCard
                 question={question}
-                onVote={handleVote}
+                onLike={handleLike}
+                onDislike={handleDislike}
                 onBookmark={handleBookmark}
               />
             </div>

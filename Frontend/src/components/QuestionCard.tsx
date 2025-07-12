@@ -1,6 +1,7 @@
-import { ArrowUp, ArrowDown, MessageSquare, Bookmark, Eye, Clock } from 'lucide-react';
+import { Heart, ThumbsDown, MessageSquare, Bookmark, Eye, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 
 interface Question {
   id: string;
@@ -12,7 +13,8 @@ interface Question {
     reputation: number;
   };
   tags: string[];
-  votes: number;
+  likes: number;
+  dislikes: number;
   answers: number;
   views: number;
   timeAgo: string;
@@ -22,37 +24,63 @@ interface Question {
 
 interface QuestionCardProps {
   question: Question;
-  onVote: (questionId: string, direction: 'up' | 'down') => void;
+  onLike: (questionId: string) => void;
+  onDislike: (questionId: string) => void;
   onBookmark: (questionId: string) => void;
 }
 
-export default function QuestionCard({ question, onVote, onBookmark }: QuestionCardProps) {
+export default function QuestionCard({ question, onLike, onDislike, onBookmark }: QuestionCardProps) {
+  const navigate = useNavigate();
+
+  const handleQuestionClick = () => {
+    navigate(`/question/${question.id}`);
+  };
+
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onLike(question.id);
+  };
+
+  const handleDislikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDislike(question.id);
+  };
+
+  const handleBookmarkClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onBookmark(question.id);
+  };
+
   return (
-    <div className="stackit-card p-6 hover:scale-[1.02] animate-fade-in">
+    <div className="stackit-card p-6 hover:scale-[1.02] animate-fade-in cursor-pointer" onClick={handleQuestionClick}>
       <div className="flex gap-4">
-        {/* Vote Section */}
+        {/* Like/Dislike Section */}
         <div className="flex flex-col items-center space-y-2 min-w-[60px]">
           <Button
             variant="ghost"
             size="sm"
-            className="stackit-vote-button text-muted-foreground hover:text-secondary hover:bg-secondary/10"
-            onClick={() => onVote(question.id, 'up')}
+            className="stackit-vote-button text-muted-foreground hover:text-red-500 hover:bg-red-50"
+            onClick={handleLikeClick}
           >
-            <ArrowUp className="h-5 w-5" />
+            <Heart className="h-5 w-5" />
           </Button>
           
           <div className="text-lg font-heading font-semibold text-foreground">
-            {question.votes}
+            {question.likes}
           </div>
           
           <Button
             variant="ghost"
             size="sm"
-            className="stackit-vote-button text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-            onClick={() => onVote(question.id, 'down')}
+            className="stackit-vote-button text-muted-foreground hover:text-gray-500 hover:bg-gray-50"
+            onClick={handleDislikeClick}
           >
-            <ArrowDown className="h-5 w-5" />
+            <ThumbsDown className="h-5 w-5" />
           </Button>
+          
+          <div className="text-sm font-medium text-muted-foreground">
+            {question.dislikes}
+          </div>
         </div>
 
         {/* Stats Section */}
@@ -130,7 +158,7 @@ export default function QuestionCard({ question, onVote, onBookmark }: QuestionC
                 variant="ghost"
                 size="sm"
                 className="text-muted-foreground hover:text-secondary"
-                onClick={() => onBookmark(question.id)}
+                onClick={handleBookmarkClick}
               >
                 <Bookmark className="h-4 w-4" />
               </Button>
