@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { analyzeRelevance, paraphrase, translate } from '../lib/gemini';
+import parse from 'html-react-parser';
+import DOMPurify from 'dompurify';
 
 const LANGUAGES = [
   'Spanish',
@@ -28,6 +30,41 @@ const Loader = () => (
     <span className="text-purple-700 font-medium animate-pulse text-lg">AI is thinking...</span>
   </div>
 );
+
+const formatContent = (content: string) => {
+  // First handle code blocks (```...)
+  const parts = content.split('```');
+  const formattedParts = parts.map((part, index) => {
+    if (index % 2 === 1) {
+      // This is a code block
+      const code = part.replace(/^(.*)\n/, '').trim();
+      return `<pre class="bg-white/90 text-purple-900 border border-purple-100 p-3 rounded-md my-2 overflow-x-auto font-mono text-sm shadow-sm"><code>${code}</code></pre>`;
+    } else {
+      // Handle inline code
+      let formattedText = part.split('`').map((text, i) =>
+        i % 2 === 1
+          ? `<code class="bg-white/90 text-purple-800 px-1.5 py-0.5 rounded border border-purple-100 font-mono text-sm">${text}</code>`
+          : text
+      ).join('');
+
+      // Handle analysis headers with **text**
+      formattedText = formattedText.replace(
+        /\*\*(.*?)\*\*/g,
+        '<span class="font-semibold text-purple-900 block mt-3 mb-2">$1</span>'
+      );
+
+      // Handle section breaks with ***
+      formattedText = formattedText.replace(
+        /\*\*\*/g,
+        '<hr class="border-t border-purple-100 my-3">'
+      );
+
+      return formattedText;
+    }
+  });
+
+  return formattedParts.join('');
+};
 
 const AIPoweredTools: React.FC<AIPoweredToolsProps> = ({ content, onResult }) => {
   const [selectedLang, setSelectedLang] = useState('Spanish');
@@ -154,7 +191,10 @@ const AIPoweredTools: React.FC<AIPoweredToolsProps> = ({ content, onResult }) =>
       )}
       {!loading && result && (
         <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg text-purple-900 animate-fade-in shadow">
-          <strong>AI Result:</strong> {result}
+          <div className="font-medium mb-2">AI Result:</div>
+          <div className="whitespace-pre-wrap">
+            {parse(DOMPurify.sanitize(formatContent(result)))}
+          </div>
         </div>
       )}
       {/* Demo Notice */}
@@ -166,4 +206,4 @@ const AIPoweredTools: React.FC<AIPoweredToolsProps> = ({ content, onResult }) =>
   );
 };
 
-export default AIPoweredTools; 
+export default AIPoweredTools;
