@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Filter, SortAsc, SortDesc, Search, X } from 'lucide-react';
 import Navigation from '@/components/Navigation';
@@ -7,13 +7,30 @@ import AskQuestionModal from '@/components/AskQuestionModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import axios from '@/lib/axios';
 
 const Questions = () => {
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    async function fetchQuestions() {
+      setLoading(true);
+      try {
+        const res = await axios.get('/questions');
+        setQuestions(res.data.questions || []);
+      } catch (err) {
+        // handle error
+      }
+      setLoading(false);
+    }
+    fetchQuestions();
+  }, []);
 
   const handleAskQuestion = () => {
     setIsAskModalOpen(true);
@@ -48,57 +65,17 @@ const Questions = () => {
     { id: 'views', label: 'Most Viewed', icon: SortDesc },
   ];
 
-  // Mock questions data for demonstration
-  const mockQuestions = [
-    {
-      id: '1',
-      title: 'How to implement authentication with JWT in React?',
-      excerpt: 'I\'m trying to implement JWT authentication in my React application but I\'m having issues with token refresh and storage.',
-      tags: ['react', 'jwt', 'authentication'],
-      likes: 23,
-      dislikes: 2,
-      answers: 5,
-      views: 1234,
-      hasAcceptedAnswer: true,
-      createdAt: new Date('2024-01-15'),
-    },
-    {
-      id: '2',
-      title: 'Best practices for TypeScript error handling',
-      excerpt: 'What are the recommended patterns for handling errors in TypeScript applications?',
-      tags: ['typescript', 'error-handling'],
-      likes: 15,
-      dislikes: 1,
-      answers: 3,
-      views: 856,
-      hasAcceptedAnswer: false,
-      createdAt: new Date('2024-01-20'),
-    },
-    {
-      id: '3',
-      title: 'Optimizing database queries in Node.js',
-      excerpt: 'I need help optimizing my database queries for better performance in my Node.js application.',
-      tags: ['nodejs', 'database', 'performance'],
-      likes: 8,
-      dislikes: 0,
-      answers: 2,
-      views: 432,
-      hasAcceptedAnswer: false,
-      createdAt: new Date('2024-01-18'),
-    },
-  ];
-
   // Filter and search questions
   const filteredQuestions = useMemo(() => {
-    let filtered = [...mockQuestions];
+    let filtered = [...questions];
 
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(question => 
         question.title.toLowerCase().includes(query) ||
-        question.excerpt.toLowerCase().includes(query) ||
-        question.tags.some(tag => tag.toLowerCase().includes(query))
+        question.excerpt?.toLowerCase().includes(query) ||
+        (question.tags || []).some((tag: string) => tag.toLowerCase().includes(query))
       );
     }
 
@@ -112,7 +89,7 @@ const Questions = () => {
         break;
       case 'recent':
         filtered = filtered.filter(q => {
-          const daysAgo = (Date.now() - q.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+          const daysAgo = (Date.now() - new Date(q.createdAt).getTime()) / (1000 * 60 * 60 * 24);
           return daysAgo <= 7;
         });
         break;
@@ -127,7 +104,7 @@ const Questions = () => {
     // Apply sorting
     switch (sortBy) {
       case 'oldest':
-        filtered.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
         break;
       case 'votes':
         filtered.sort((a, b) => b.likes - a.likes);
@@ -140,12 +117,12 @@ const Questions = () => {
         break;
       default:
         // 'newest' - default sorting
-        filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         break;
     }
 
     return filtered;
-  }, [searchQuery, selectedFilter, sortBy]);
+  }, [questions, searchQuery, selectedFilter, sortBy]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -260,7 +237,11 @@ const Questions = () => {
 
         {/* Questions List */}
         <div className="space-y-6">
-          {filteredQuestions.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-12">
+              <p>Loading questions...</p>
+            </div>
+          ) : filteredQuestions.length > 0 ? (
             <div className="space-y-4">
               {filteredQuestions.map((question) => (
                 <div key={question.id} className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer">
@@ -272,7 +253,7 @@ const Questions = () => {
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex flex-wrap gap-2">
-                      {question.tags.map((tag) => (
+                      {question.tags.map((tag: string) => (
                         <Badge key={tag} variant="outline" className="text-xs">
                           {tag}
                         </Badge>
@@ -313,7 +294,7 @@ const Questions = () => {
         {filteredQuestions.length > 0 && (
           <div className="mt-8 flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
-              Showing {filteredQuestions.length} of {mockQuestions.length} questions
+              Showing {filteredQuestions.length} of {questions.length} questions
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" disabled>

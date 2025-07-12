@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Eye, EyeOff, ArrowLeft } from "lucide-react";
-import { signup } from "@/lib/api";
+import { signup as apiSignup } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/lib/UserContext";
 
 const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,6 +20,7 @@ const SignupPage = () => {
   });
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { login } = useUser();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -39,12 +41,16 @@ const SignupPage = () => {
     }
     setIsLoading(true);
     try {
-      const result = await signup({
+      const result = await apiSignup({
         email: formData.email,
         password: formData.password,
         fullName: formData.fullName
       });
       if (result.success) {
+        login({
+          name: result.user.fullName,
+          email: result.user.email,
+        });
         toast({
           title: "Welcome to StackIt!",
           description: "Your account has been created successfully.",

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,7 @@ import {
   Shield,
   Award
 } from 'lucide-react';
+import axios from '@/lib/axios';
 
 interface DashboardProps {
   onAskQuestion: () => void;
@@ -27,121 +28,31 @@ interface DashboardProps {
 
 const Dashboard = ({ onAskQuestion }: DashboardProps) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [userData, setUserData] = useState<any>(null);
+  const [recentQuestions, setRecentQuestions] = useState<any[]>([]);
+  const [recentAnswers, setRecentAnswers] = useState<any[]>([]);
+  const [achievements, setAchievements] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock user data
-  const userData = {
-    name: "John Doe",
-    username: "johndoe",
-    email: "john@example.com",
-    avatar: "",
-    joinDate: "January 2024",
-    reputation: 1248,
-    badges: {
-      bronze: 12,
-      silver: 5,
-      gold: 2
-    },
-    stats: {
-      questionsAsked: 23,
-      answersGiven: 45,
-      votesReceived: 128,
-      bestAnswers: 12,
-      questionsViewed: 1500,
-      profileViews: 89
+  useEffect(() => {
+    async function fetchDashboardData() {
+      setLoading(true);
+      try {
+        const userRes = await axios.get('/auth/me');
+        setUserData(userRes.data);
+        const questionsRes = await axios.get('/questions?user=me');
+        setRecentQuestions(questionsRes.data.questions || []);
+        const answersRes = await axios.get('/answers?user=me');
+        setRecentAnswers(answersRes.data.answers || []);
+        // Achievements: You may need a dedicated endpoint or compute from user data
+        setAchievements([]); // Placeholder, update as needed
+      } catch (err) {
+        // handle error
+      }
+      setLoading(false);
     }
-  };
-
-  const recentQuestions = [
-    {
-      id: 1,
-      title: "How to implement authentication in React?",
-      votes: 15,
-      answers: 8,
-      views: 234,
-      tags: ["react", "authentication", "javascript"],
-      timeAgo: "2 hours ago",
-      status: "answered"
-    },
-    {
-      id: 2,
-      title: "Best practices for database design",
-      votes: 23,
-      answers: 12,
-      views: 456,
-      tags: ["database", "design", "sql"],
-      timeAgo: "1 day ago",
-      status: "accepted"
-    },
-    {
-      id: 3,
-      title: "Understanding TypeScript generics",
-      votes: 8,
-      answers: 3,
-      views: 123,
-      tags: ["typescript", "generics", "programming"],
-      timeAgo: "3 days ago",
-      status: "open"
-    }
-  ];
-
-  const recentAnswers = [
-    {
-      id: 1,
-      questionTitle: "How to optimize React performance?",
-      votes: 12,
-      accepted: true,
-      timeAgo: "1 hour ago"
-    },
-    {
-      id: 2,
-      questionTitle: "Debugging Node.js applications",
-      votes: 8,
-      accepted: false,
-      timeAgo: "6 hours ago"
-    },
-    {
-      id: 3,
-      questionTitle: "CSS Grid vs Flexbox",
-      votes: 15,
-      accepted: true,
-      timeAgo: "1 day ago"
-    }
-  ];
-
-  const achievements = [
-    {
-      id: 1,
-      title: "First Question",
-      description: "Asked your first question",
-      icon: "🎯",
-      earned: true,
-      earnedDate: "Jan 15, 2024"
-    },
-    {
-      id: 2,
-      title: "Helpful Answer",
-      description: "Received 10 upvotes on an answer",
-      icon: "👍",
-      earned: true,
-      earnedDate: "Jan 22, 2024"
-    },
-    {
-      id: 3,
-      title: "Knowledge Seeker",
-      description: "Asked 10 questions",
-      icon: "🔍",
-      earned: true,
-      earnedDate: "Feb 5, 2024"
-    },
-    {
-      id: 4,
-      title: "Expert Contributor",
-      description: "Received 100 upvotes total",
-      icon: "⭐",
-      earned: false,
-      progress: 78
-    }
-  ];
+    fetchDashboardData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -150,31 +61,31 @@ const Dashboard = ({ onAskQuestion }: DashboardProps) => {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
             <Avatar className="h-24 w-24">
-              <AvatarImage src={userData.avatar} alt={userData.name} />
+              <AvatarImage src={userData?.avatar} alt={userData?.name} />
               <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                {userData.name.split(' ').map(n => n[0]).join('')}
+                {userData?.name?.split(' ').map(n => n[0]).join('')}
               </AvatarFallback>
             </Avatar>
             
             <div className="flex-1">
               <h1 className="text-3xl font-heading font-bold text-foreground">
-                {userData.name}
+                {userData?.name}
               </h1>
-              <p className="text-muted-foreground">@{userData.username}</p>
+              <p className="text-muted-foreground">@{userData?.username}</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Member since {userData.joinDate}
+                Member since {userData?.joinDate}
               </p>
               
               <div className="flex flex-wrap items-center gap-4 mt-4">
                 <div className="flex items-center gap-2">
                   <Trophy className="h-4 w-4 text-secondary" />
-                  <span className="font-medium">{userData.reputation.toLocaleString()} reputation</span>
+                  <span className="font-medium">{userData?.reputation?.toLocaleString()} reputation</span>
                 </div>
                 
                 <div className="flex items-center gap-2">
                   <Award className="h-4 w-4 text-yellow-500" />
                   <span className="text-sm">
-                    {userData.badges.gold}🥇 {userData.badges.silver}🥈 {userData.badges.bronze}🥉
+                    {userData?.badges?.gold}🥇 {userData?.badges?.silver}🥈 {userData?.badges?.bronze}🥉
                   </span>
                 </div>
               </div>
@@ -215,7 +126,7 @@ const Dashboard = ({ onAskQuestion }: DashboardProps) => {
                   <div className="flex items-center gap-3">
                     <MessageSquare className="h-8 w-8 text-primary" />
                     <div>
-                      <p className="text-2xl font-bold">{userData.stats.questionsAsked}</p>
+                      <p className="text-2xl font-bold">{userData?.stats?.questionsAsked}</p>
                       <p className="text-sm text-muted-foreground">Questions</p>
                     </div>
                   </div>
@@ -227,7 +138,7 @@ const Dashboard = ({ onAskQuestion }: DashboardProps) => {
                   <div className="flex items-center gap-3">
                     <MessageSquare className="h-8 w-8 text-secondary" />
                     <div>
-                      <p className="text-2xl font-bold">{userData.stats.answersGiven}</p>
+                      <p className="text-2xl font-bold">{userData?.stats?.answersGiven}</p>
                       <p className="text-sm text-muted-foreground">Answers</p>
                     </div>
                   </div>
@@ -239,7 +150,7 @@ const Dashboard = ({ onAskQuestion }: DashboardProps) => {
                   <div className="flex items-center gap-3">
                     <ThumbsUp className="h-8 w-8 text-accent" />
                     <div>
-                      <p className="text-2xl font-bold">{userData.stats.votesReceived}</p>
+                      <p className="text-2xl font-bold">{userData?.stats?.votesReceived}</p>
                       <p className="text-sm text-muted-foreground">Votes</p>
                     </div>
                   </div>
@@ -251,7 +162,7 @@ const Dashboard = ({ onAskQuestion }: DashboardProps) => {
                   <div className="flex items-center gap-3">
                     <Star className="h-8 w-8 text-yellow-500" />
                     <div>
-                      <p className="text-2xl font-bold">{userData.stats.bestAnswers}</p>
+                      <p className="text-2xl font-bold">{userData?.stats?.bestAnswers}</p>
                       <p className="text-sm text-muted-foreground">Best Answers</p>
                     </div>
                   </div>

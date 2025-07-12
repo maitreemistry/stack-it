@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Navigation from './Navigation';
 import AIPoweredTools from './AIPoweredTools';
+import axios from '@/lib/axios';
 
 interface Answer {
   id: string;
@@ -46,8 +47,9 @@ interface Question {
 const QuestionPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>({ id: 'u1', username: 'currentuser' }); // Mock user
-  const [question, setQuestion] = useState<Question | null>(null);
+  const [user, setUser] = useState<any>(null); // Replace with real user context if needed
+  const [question, setQuestion] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [newAnswer, setNewAnswer] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAIFeatures, setShowAIFeatures] = useState(false);
@@ -58,279 +60,17 @@ const QuestionPage = () => {
   };
 
   useEffect(() => {
-    // Mock data that matches the QuestionList structure
-    const mockQuestions = [
-      {
-        id: '1',
-        title: 'How to implement authentication with JWT in React?',
-        description: `<p>I'm trying to implement JWT authentication in my React application but I'm having issues with token refresh and storage. What are the best practices?</p>
-
-<p>Here's what I have so far:</p>
-
-<pre><code>const useAuth = () => {
-  const [token, setToken] = useState(localStorage.getItem('token'));
-  
-  const login = async (credentials) => {
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credentials)
-    });
-    const data = await response.json();
-    setToken(data.token);
-    localStorage.setItem('token', data.token);
-  };
-};</code></pre>
-
-<p>The issue I'm facing is with token refresh and secure storage. How should I handle token expiration and refresh tokens?</p>`,
-        tags: ['react', 'jwt', 'authentication', 'javascript'],
-        author: {
-          username: 'Sarah Chen',
-          id: 'u1',
-          avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=50&h=50&fit=crop&crop=face',
-          reputation: 2456
-        },
-        likes: 23,
-        dislikes: 2,
-        likedBy: [],
-        dislikedBy: [],
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
-        answers: [
-          {
-            id: 'a1',
-            text: `<p>For JWT authentication in React, here are the best practices:</p>
-
-<pre><code>const useAuth = () => {
-  const [token, setToken] = useState(null);
-  const [refreshToken, setRefreshToken] = useState(null);
-
-  const login = async (credentials) => {
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credentials)
-    });
-    const data = await response.json();
-    
-    // Store tokens securely
-    setToken(data.accessToken);
-    setRefreshToken(data.refreshToken);
-    
-    // Use httpOnly cookies for refresh tokens
-    document.cookie = \`refreshToken=\${data.refreshToken}; httpOnly; secure; sameSite=strict\`;
-  };
-
-  const refreshAccessToken = async () => {
-    const response = await fetch('/api/refresh', {
-      method: 'POST',
-      credentials: 'include' // Include cookies
-    });
-    const data = await response.json();
-    setToken(data.accessToken);
-  };
-};</code></pre>
-
-<p>This approach ensures secure token storage and automatic refresh.</p>`,
-            author: {
-              username: 'AuthExpert',
-              id: 'u2',
-              avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face',
-              reputation: 3200
-            },
-            likes: 15,
-            dislikes: 1,
-            isAccepted: true,
-            createdAt: new Date(Date.now() - 1000 * 60 * 60),
-            likedBy: [],
-            dislikedBy: []
-          },
-          {
-            id: 'a2',
-            text: `<p>Another important consideration is token expiration handling:</p>
-
-<pre><code>// Add to your useAuth hook
-useEffect(() => {
-  if (token) {
-    const decoded = jwt_decode(token);
-    const timeUntilExpiry = decoded.exp * 1000 - Date.now();
-    
-    // Refresh token 5 minutes before expiry
-    if (timeUntilExpiry < 300000) {
-      refreshAccessToken();
-    }
-  }
-}, [token]);</code></pre>
-
-<p>This ensures seamless user experience without token expiration issues.</p>`,
-            author: {
-              username: 'ReactDev',
-              id: 'u3',
-              avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face',
-              reputation: 1800
-            },
-            likes: 8,
-            dislikes: 0,
-            isAccepted: false,
-            createdAt: new Date(Date.now() - 1000 * 60 * 30),
-            likedBy: [],
-            dislikedBy: []
-          }
-        ]
-      },
-      {
-        id: '2',
-        title: 'Python vs JavaScript for backend development in 2024',
-        description: `<p>I'm starting a new project and can't decide between Python (Django/Flask) and JavaScript (Node.js) for the backend. What are the pros and cons?</p>
-
-<p>My requirements include:</p>
-<ul>
-<li>RESTful API development</li>
-<li>Database integration (PostgreSQL)</li>
-<li>Real-time features (WebSockets)</li>
-<li>Scalability for future growth</li>
-</ul>
-
-<p>Which technology stack would you recommend and why?</p>`,
-        tags: ['python', 'javascript', 'backend', 'nodejs', 'django'],
-        author: {
-          username: 'Alex Rodriguez',
-          id: 'u4',
-          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face',
-          reputation: 1823
-        },
-        likes: 18,
-        dislikes: 3,
-        likedBy: [],
-        dislikedBy: [],
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4),
-        answers: [
-          {
-            id: 'a3',
-            text: `<p>For your requirements, I'd recommend <strong>Node.js</strong> for the following reasons:</p>
-
-<h3>Pros of Node.js:</h3>
-<ul>
-<li><strong>JavaScript everywhere:</strong> Same language for frontend and backend</li>
-<li><strong>Performance:</strong> Excellent for I/O heavy applications</li>
-<li><strong>Real-time:</strong> Native WebSocket support with Socket.io</li>
-<li><strong>Ecosystem:</strong> Massive npm ecosystem with excellent packages</li>
-<li><strong>Scalability:</strong> Easy horizontal scaling with clustering</li>
-</ul>
-
-<pre><code>// Example Node.js setup
-const express = require('express');
-const { Pool } = require('pg');
-const socketIo = require('socket.io');
-
-const app = express();
-const server = require('http').createServer(app);
-const io = socketIo(server);
-
-// PostgreSQL connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
-});
-
-// Real-time features
-io.on('connection', (socket) => {
-  socket.on('message', (data) => {
-    io.emit('message', data);
-  });
-});</code></pre>`,
-            author: {
-              username: 'BackendGuru',
-              id: 'u5',
-              avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face',
-              reputation: 2500
-            },
-            likes: 12,
-            dislikes: 0,
-            isAccepted: true,
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3),
-            likedBy: [],
-            dislikedBy: []
-          }
-        ]
-      },
-      {
-        id: '3',
-        title: 'CSS Grid vs Flexbox: When to use which?',
-        description: `<p>I'm confused about when to use CSS Grid versus Flexbox. Can someone explain the differences and provide some practical examples?</p>
-
-<p>I understand both are powerful layout tools, but I'm not sure when to choose one over the other for different scenarios.</p>`,
-        tags: ['css', 'grid', 'flexbox', 'layout', 'frontend'],
-        author: {
-          username: 'Emma Thompson',
-          id: 'u6',
-          avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face',
-          reputation: 3201
-        },
-        likes: 31,
-        dislikes: 1,
-        likedBy: [],
-        dislikedBy: [],
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6),
-        answers: []
-      },
-      {
-        id: '4',
-        title: 'Docker container keeps crashing on production server',
-        description: `<p>My Docker container works fine locally but keeps crashing when deployed to production. The logs show memory issues but I'm not sure how to debug this.</p>
-
-<p>Here's my Dockerfile:</p>
-
-<pre><code>FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-EXPOSE 3000
-CMD ["npm", "start"]</code></pre>
-
-<p>The container crashes after running for a few hours. How can I diagnose and fix this?</p>`,
-        tags: ['docker', 'production', 'memory', 'debugging', 'deployment'],
-        author: {
-          username: 'Michael Kim',
-          id: 'u7',
-          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face',
-          reputation: 1567
-        },
-        likes: 12,
-        dislikes: 4,
-        likedBy: [],
-        dislikedBy: [],
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-        answers: []
-      },
-      {
-        id: '5',
-        title: 'Best practices for API rate limiting implementation',
-        description: `<p>I need to implement rate limiting for my REST API. What are the best strategies and tools available? Should I use Redis or in-memory storage?</p>
-
-<p>My API handles user authentication, file uploads, and data processing. I want to implement different rate limits for different endpoints.</p>`,
-        tags: ['api', 'rate-limiting', 'redis', 'performance', 'backend'],
-        author: {
-          username: 'Lisa Zhang',
-          id: 'u8',
-          avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=50&h=50&fit=crop&crop=face',
-          reputation: 2890
-        },
-        likes: 27,
-        dislikes: 2,
-        likedBy: [],
-        dislikedBy: [],
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-        answers: []
+    async function fetchQuestion() {
+      setLoading(true);
+      try {
+        const res = await axios.get(`/questions/${id}`);
+        setQuestion(res.data.question);
+      } catch (err) {
+        // handle error
       }
-    ];
-
-    const foundQuestion = mockQuestions.find(q => q.id === id);
-    if (foundQuestion) {
-      setQuestion(foundQuestion);
-    } else {
-      // Fallback to a default question if ID not found
-      setQuestion(mockQuestions[0]);
+      setLoading(false);
     }
+    if (id) fetchQuestion();
   }, [id]);
 
   const handleLikeQuestion = () => {
@@ -546,6 +286,14 @@ CMD ["npm", "start"]</code></pre>
     return `${Math.floor(diffInHours / 24)}d ago`;
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   if (!question) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -630,7 +378,7 @@ CMD ["npm", "start"]</code></pre>
             </div>
 
             <div 
-              className="prose prose-gray max-w-none mb-6 prose-headings:font-heading prose-a:text-blue-600 prose-a:underline prose-a:hover:text-blue-800 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-sm prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-700 prose-pre:rounded-lg prose-pre:p-4 prose-pre:my-4 prose-pre:overflow-x-auto prose-pre:shadow-lg prose-pre_code:bg-transparent prose-pre_code:text-gray-100 prose-pre_code:p-0 prose-pre_code:font-mono prose-pre_code:text-sm prose-pre_code:leading-relaxed"
+              className="prose prose-gray max-w-none mb-6 prose-headings:font-heading prose-a:text-blue-600 prose-a:underline prose-a:hover:text-blue-800 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-sm prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-700 prose-pre:rounded-lg prose-pre:p-4 prose-pre:my-4 prose-pre:overflow-x-auto prose-pre:shadow-lg prose-pre_code:bg-transparent prose-pre_code:text-gray-100 prose-pre_code:p-0 prose-pre_code:font-mono prose-code:text-sm prose-pre_code:leading-relaxed"
               dangerouslySetInnerHTML={{ __html: question.description }}
             />
 
