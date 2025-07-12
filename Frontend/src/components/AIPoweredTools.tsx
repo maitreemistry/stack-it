@@ -160,7 +160,7 @@ const AIPoweredTools: React.FC<AIPoweredToolsProps> = ({ content, onResult }) =>
       {/* Demo Notice */}
       <div className="mt-6 p-4 bg-gradient-to-r from-yellow-100 via-yellow-50 to-yellow-100 border border-yellow-300 rounded-xl text-yellow-900 text-sm shadow flex items-center gap-2">
         <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fde68a"/><path d="M12 8v4m0 4h.01" stroke="#b45309" strokeWidth="2" strokeLinecap="round"/></svg>
-        <span><strong>Demo Mode:</strong> This is a simulation of AI features. In production, these would be powered by Google Gemini API.</span>
+        <span><strong>Disclaimer:</strong> While using this feature, we do not guarantee the authenticity. Gemini can make mistakes, so double-check it.</span>
       </div>
     </div>
   );

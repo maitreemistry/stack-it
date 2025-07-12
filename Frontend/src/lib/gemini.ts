@@ -23,11 +23,11 @@ export async function analyzeRelevance(content: string) {
 }
 
 export async function paraphrase(content: string) {
-  const prompt = `Rewrite the following content for better clarity and readability.\n\nContent:\n${content}`;
+  const prompt = `Rewrite the following content for better clarity and readability. Make sure you make the html and other languages properly formatted for better understanding. Do not make it big.\n\nContent:\n${content}`;
   return geminiRequest(prompt);
 }
 
 export async function translate(content: string, targetLang: string) {
-  const prompt = `Translate the following content to ${targetLang}.\n\nContent:\n${content}`;
+  const prompt = `Translate the following content to ${targetLang}. Do not alter the code part, only translate the text part.\n\nContent:\n${content}`;
   return geminiRequest(prompt);
 } 
