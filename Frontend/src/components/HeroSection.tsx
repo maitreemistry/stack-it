@@ -53,28 +53,30 @@ export default function HeroSection({ onAskQuestion, onSearch }: HeroSectionProp
 
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto mb-8">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5 pointer-events-none" />
+            <div className="relative group">
+              <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 text-muted-foreground h-6 w-6 pointer-events-none transition-colors group-focus-within:text-primary" />
               <Input
                 placeholder="Search thousands of questions or ask your own..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="pl-12 pr-24 py-4 text-lg stackit-input h-14 rounded-xl border-2 focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground hover:border-border focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="pl-14 pr-40 py-5 text-xl font-medium h-16 rounded-2xl border border-border bg-white/90 shadow-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder:text-muted-foreground hover:border-primary outline-none"
               />
               {searchQuery && (
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon"
                   onClick={clearSearch}
-                  className="absolute right-20 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted/50 transition-colors"
+                  className="absolute right-32 top-1/2 transform -translate-y-1/2 h-10 w-10 p-0 rounded-full bg-muted/60 hover:bg-muted/80 text-muted-foreground hover:text-foreground shadow transition-all z-10"
+                  tabIndex={-1}
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-5 w-5" />
                 </Button>
               )}
               <Button 
                 onClick={handleSearch}
-                className="absolute right-2 top-2 stackit-button-secondary h-10"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-12 px-8 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold shadow-md hover:from-primary/90 hover:to-secondary/90 focus:ring-2 focus:ring-primary/30 transition-all z-20"
+                style={{ letterSpacing: '0.03em' }}
               >
                 Search
               </Button>
