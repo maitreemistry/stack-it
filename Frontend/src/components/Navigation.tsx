@@ -27,6 +27,7 @@ export default function Navigation({ onAskQuestion }: NavigationProps) {
             <div className="hidden md:flex items-center space-x-6 ml-8">
               <button onClick={() => navigate('/questions')} className="text-foreground hover:text-primary transition-colors">Questions</button>
               <button onClick={() => navigate('/')} className="text-foreground hover:text-primary transition-colors">Users</button>
+              <button onClick={() => navigate('/admin')} className="text-foreground hover:text-primary transition-colors">Admin</button>
             </div>
           </div>
 
@@ -111,6 +112,7 @@ export default function Navigation({ onAskQuestion }: NavigationProps) {
               <div className="space-y-2">
                 <button onClick={() => navigate('/questions')} className="block py-2 text-foreground hover:text-primary transition-colors">Questions</button>
                 <button onClick={() => navigate('/')} className="block py-2 text-foreground hover:text-primary transition-colors">Users</button>
+                <button onClick={() => navigate('/admin')} className="block py-2 text-foreground hover:text-primary transition-colors">Admin</button>
               </div>
 
               {/* Mobile Ask Question Button */}
